@@ -1,0 +1,8 @@
+@startuml LightFit_Context
+!include templates/C4_Context.puml
+
+Person(user, "Пользователь", "Человек, использующий LightFit")
+System(lightfit, "LightFit", "Фитнес-приложение")
+
+Rel(user, lightfit, "Использует", "HTTP")
+@enduml
