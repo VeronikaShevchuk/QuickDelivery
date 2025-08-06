@@ -1,15 +1,25 @@
+import os
 from flask import Flask, request, jsonify
 from db.models import db, Order
 from utils.db_utils import init_db
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@db:5432/orders'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgresql://'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace(
+        'postgresql://', 'postgresql+psycopg2://'
+    )
 db.init_app(app)
 
 @app.route('/orders', methods=['POST'])
 def create_order():
     data = request.get_json()
-    new_order = Order(customer_name=data['customer_name'], item=data['item'], status='Pending')
+    new_order = Order(
+    customer_name=data.get('customer_name', ''),
+    item=data.get('item', ''),
+    status='Pending'
+)
     db.session.add(new_order)
     db.session.commit()
     return jsonify({'message': 'Order created successfully'}), 201
